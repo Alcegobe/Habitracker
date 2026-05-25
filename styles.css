@@ -550,7 +550,7 @@ body.modal-open {
   border-radius: var(--radius);
   color: var(--fg-default);
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
 }

@@ -1,7 +1,8 @@
 {
   "name": "Habitracker",
   "short_name": "Habitracker",
-  "description": "Track daily habits with a GitHub-style contribution graph.",
+  "description": "Suis tes habitudes quotidiennes avec un calendrier visuel.",
+  "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

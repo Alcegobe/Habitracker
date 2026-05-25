@@ -2,11 +2,14 @@
   "use strict";
 
   const STORAGE_KEY = "habitracker.habits.v1";
+  const LOCALE = "fr-FR";
   const WEEKS = 53;
   const MONTH_NAMES = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin",
+    "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc.",
   ];
+
+  const pluralDays = (n) => `${n} ${n <= 1 ? "jour" : "jours"} de suite`;
 
   const form = document.getElementById("addHabitForm");
   const nameInput = document.getElementById("habitName");
@@ -26,7 +29,7 @@
       if (!Array.isArray(parsed)) return [];
       return parsed.map((h) => ({
         id: String(h.id),
-        name: String(h.name || "Untitled habit"),
+        name: String(h.name || "Habitude sans nom"),
         dates: Array.isArray(h.dates) ? h.dates.filter((d) => typeof d === "string") : [],
       }));
     } catch (e) {
@@ -99,30 +102,31 @@
       habits.forEach(renderHabit);
     }
 
-    const s = globalStreak();
-    globalStreakEl.textContent = `${s} day streak`;
+    globalStreakEl.textContent = pluralDays(globalStreak());
   }
 
   function renderHabit(habit) {
     const node = template.content.firstElementChild.cloneNode(true);
     node.dataset.id = habit.id;
 
+    const streak = computeStreak(habit.dates);
     node.querySelector(".habit-name").textContent = habit.name;
-    node.querySelector(".streak-count").textContent = computeStreak(habit.dates);
+    node.querySelector(".streak-count").textContent = streak;
+    node.querySelector(".streak-label").textContent = streak <= 1 ? "jour de suite" : "jours de suite";
     node.querySelector(".total-count").textContent = habit.dates.length;
 
     const todayBtn = node.querySelector(".today-btn");
     const isDoneToday = habit.dates.includes(todayKey());
     if (isDoneToday) {
       todayBtn.classList.add("done");
-      todayBtn.textContent = "Done today";
+      todayBtn.textContent = "Fait aujourd'hui";
     } else {
-      todayBtn.textContent = "Mark today";
+      todayBtn.textContent = "Cocher aujourd'hui";
     }
     todayBtn.addEventListener("click", () => toggleDay(habit.id, todayKey()));
 
     node.querySelector(".delete-btn").addEventListener("click", () => {
-      if (confirm(`Delete "${habit.name}"? This cannot be undone.`)) {
+      if (confirm(`Supprimer « ${habit.name} » ? Cette action est irréversible.`)) {
         deleteHabit(habit.id);
       }
     });
@@ -208,13 +212,13 @@
 
   function showTooltip(e, key, done) {
     const d = parseKey(key);
-    const formatted = d.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
+    const formatted = d.toLocaleDateString(LOCALE, {
+      weekday: "long",
       day: "numeric",
+      month: "long",
       year: "numeric",
     });
-    tooltip.textContent = done ? `Done · ${formatted}` : `No activity · ${formatted}`;
+    tooltip.textContent = done ? `Fait · ${formatted}` : `Rien · ${formatted}`;
     tooltip.classList.remove("hidden");
     moveTooltip(e);
   }

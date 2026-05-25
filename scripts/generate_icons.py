@@ -1,64 +1,71 @@
 """Generate PWA icons for Habitracker.
 
-Produces a set of PNG icons (and a maskable variant) from a single
-GitHub-contribution-graph–inspired design. Run once to refresh assets.
+Renders a flame mark (the streak symbol) on a dark rounded background
+at every size the manifest declares. Run once to refresh assets.
 """
 
+import io
+from pathlib import Path
+
+import cairosvg
 from PIL import Image, ImageDraw
 
-# GitHub dark theme contribution colors
-COLORS = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
 BG = "#0d1117"
-RING = "#21262d"
+FLAME_OUTER = "#1f8a3a"
+FLAME_INNER = "#39d353"
 
-# 5x5 pattern (level 0-4)
-PATTERN = [
-    [1, 0, 2, 0, 1],
-    [2, 3, 4, 3, 2],
-    [3, 4, 4, 4, 3],
-    [2, 3, 4, 3, 2],
-    [1, 0, 2, 0, 1],
-]
+FLAME_SVG = f"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <path fill="{FLAME_OUTER}" d="
+    M50 6
+    Q 56 22 66 32
+    Q 78 44 80 60
+    Q 82 82 60 90
+    Q 50 93 40 90
+    Q 18 82 20 60
+    Q 22 44 34 32
+    Q 44 22 50 6 Z"/>
+  <path fill="{FLAME_INNER}" d="
+    M50 44
+    Q 55 54 61 62
+    Q 68 73 60 84
+    Q 50 90 40 84
+    Q 32 73 39 62
+    Q 45 54 50 44 Z"/>
+</svg>
+"""
+
+
+def render_flame(size: int) -> Image.Image:
+    png_bytes = cairosvg.svg2png(
+        bytestring=FLAME_SVG.encode("utf-8"),
+        output_width=size,
+        output_height=size,
+    )
+    return Image.open(io.BytesIO(png_bytes)).convert("RGBA")
 
 
 def render(size: int, maskable: bool = False) -> Image.Image:
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
 
-    # Background (rounded square, or full square for maskable safe area)
     if maskable:
-        # Maskable icons must fill the entire canvas; OS clips to its mask.
         draw.rectangle([0, 0, size, size], fill=BG)
-        # Pattern occupies the inner 80% safe zone
-        safe = int(size * 0.8)
-        offset = (size - safe) // 2
+        flame_size = int(size * 0.55)
     else:
         radius = int(size * 0.22)
         draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=radius, fill=BG)
-        safe = int(size * 0.78)
-        offset = (size - safe) // 2
+        flame_size = int(size * 0.7)
 
-    # 5x5 grid inside the safe area
-    cell_gap = max(1, safe // 40)
-    cell_size = (safe - cell_gap * 4) // 5
-
-    for row in range(5):
-        for col in range(5):
-            x = offset + col * (cell_size + cell_gap)
-            y = offset + row * (cell_size + cell_gap)
-            level = PATTERN[row][col]
-            color = COLORS[level]
-            r = max(1, cell_size // 5)
-            draw.rounded_rectangle(
-                [x, y, x + cell_size - 1, y + cell_size - 1],
-                radius=r,
-                fill=color,
-            )
-
-    return img
+    flame = render_flame(flame_size)
+    offset = ((size - flame_size) // 2, (size - flame_size) // 2)
+    canvas.paste(flame, offset, flame)
+    return canvas
 
 
 def main() -> None:
+    out = Path("icons")
+    out.mkdir(exist_ok=True)
     sizes = {
         "icon-192.png": (192, False),
         "icon-512.png": (512, False),
@@ -68,8 +75,8 @@ def main() -> None:
     }
     for filename, (size, maskable) in sizes.items():
         img = render(size, maskable=maskable)
-        img.save(f"icons/{filename}", optimize=True)
-        print(f"  wrote icons/{filename}  ({size}x{size}{', maskable' if maskable else ''})")
+        img.save(out / filename, optimize=True)
+        print(f"  wrote {out / filename}  ({size}x{size}{', maskable' if maskable else ''})")
 
 
 if __name__ == "__main__":

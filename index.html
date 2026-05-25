@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Habitracker</title>
-  <meta name="description" content="Track daily habits with a GitHub-style contribution graph." />
+  <meta name="description" content="Suivez vos habitudes quotidiennes avec un calendrier visuel." />
   <meta name="theme-color" content="#0d1117" />
   <meta name="color-scheme" content="dark" />
 
@@ -16,7 +16,7 @@
 
   <!-- Open Graph -->
   <meta property="og:title" content="Habitracker" />
-  <meta property="og:description" content="Track daily habits with a GitHub-style contribution graph." />
+  <meta property="og:description" content="Suivez vos habitudes quotidiennes avec un calendrier visuel." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="icons/icon-512.png" />
 
@@ -31,45 +31,31 @@
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
-        <svg class="logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
-          <rect x="2"  y="2"  width="6" height="6" rx="1.5" fill="#0e4429"/>
-          <rect x="10" y="2"  width="6" height="6" rx="1.5" fill="#161b22"/>
-          <rect x="18" y="2"  width="6" height="6" rx="1.5" fill="#006d32"/>
-          <rect x="26" y="2"  width="4" height="6" rx="1.5" fill="#0e4429"/>
-          <rect x="2"  y="10" width="6" height="6" rx="1.5" fill="#006d32"/>
-          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#26a641"/>
-          <rect x="18" y="10" width="6" height="6" rx="1.5" fill="#39d353"/>
-          <rect x="26" y="10" width="4" height="6" rx="1.5" fill="#26a641"/>
-          <rect x="2"  y="18" width="6" height="6" rx="1.5" fill="#26a641"/>
-          <rect x="10" y="18" width="6" height="6" rx="1.5" fill="#39d353"/>
-          <rect x="18" y="18" width="6" height="6" rx="1.5" fill="#39d353"/>
-          <rect x="26" y="18" width="4" height="6" rx="1.5" fill="#39d353"/>
-          <rect x="2"  y="26" width="6" height="4" rx="1.5" fill="#0e4429"/>
-          <rect x="10" y="26" width="6" height="4" rx="1.5" fill="#006d32"/>
-          <rect x="18" y="26" width="6" height="4" rx="1.5" fill="#161b22"/>
-          <rect x="26" y="26" width="4" height="4" rx="1.5" fill="#0e4429"/>
+        <svg class="logo" viewBox="0 0 100 100" width="28" height="28" aria-hidden="true">
+          <path fill="#1f8a3a" d="M50 6 Q 56 22 66 32 Q 78 44 80 60 Q 82 82 60 90 Q 50 93 40 90 Q 18 82 20 60 Q 22 44 34 32 Q 44 22 50 6 Z"/>
+          <path fill="#39d353" d="M50 44 Q 55 54 61 62 Q 68 73 60 84 Q 50 90 40 84 Q 32 73 39 62 Q 45 54 50 44 Z"/>
         </svg>
         <h1>Habitracker</h1>
       </div>
       <div class="header-actions">
-        <span class="streak-badge" id="globalStreak">0 day streak</span>
+        <span class="streak-badge" id="globalStreak">0 jour de suite</span>
       </div>
     </div>
   </header>
 
   <main class="container">
     <section class="card add-habit-card">
-      <h2 class="card-title">New habit</h2>
+      <h2 class="card-title">Nouvelle habitude</h2>
       <form id="addHabitForm" class="add-habit-form">
         <input
           type="text"
           id="habitName"
           class="input"
-          placeholder="e.g. Read 30 minutes"
+          placeholder="ex : lire 30 minutes"
           maxlength="60"
           required
         />
-        <button type="submit" class="btn btn-primary">Add habit</button>
+        <button type="submit" class="btn btn-primary">Ajouter</button>
       </form>
     </section>
 
@@ -79,12 +65,12 @@
       <svg viewBox="0 0 16 16" width="48" height="48" aria-hidden="true">
         <path fill="currentColor" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"/>
       </svg>
-      <p>No habits yet. Add one above to start tracking.</p>
+      <p>Aucune habitude pour l'instant. Ajoutes-en une ci-dessus pour commencer.</p>
     </section>
   </main>
 
   <footer class="app-footer">
-    <p>Local data only · stored in your browser</p>
+    <p>Données stockées localement dans ton navigateur</p>
   </footer>
 
   <template id="habitTemplate">
@@ -95,16 +81,16 @@
           <div class="habit-meta">
             <span class="habit-stat">
               <span class="dot dot-l4"></span>
-              <span class="streak-count">0</span> day streak
+              <span class="streak-count">0</span>&nbsp;<span class="streak-label">jour de suite</span>
             </span>
             <span class="habit-stat">
-              <strong class="total-count">0</strong> total
+              <strong class="total-count">0</strong>&nbsp;<span class="total-label">au total</span>
             </span>
           </div>
         </div>
         <div class="habit-actions">
-          <button class="btn btn-success today-btn" type="button">Mark today</button>
-          <button class="btn btn-danger delete-btn" type="button" aria-label="Delete habit">
+          <button class="btn btn-success today-btn" type="button">Cocher aujourd'hui</button>
+          <button class="btn btn-danger delete-btn" type="button" aria-label="Supprimer l'habitude">
             <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
               <path fill="currentColor" d="M11 1.75V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6zM6.5 1.75V3h3V1.75a.25.25 0 00-.25-.25h-2.5a.25.25 0 00-.25.25z"/>
             </svg>
@@ -117,23 +103,23 @@
         <div class="graph">
           <div class="weekday-labels">
             <span></span>
-            <span>Mon</span>
+            <span>Lun</span>
             <span></span>
-            <span>Wed</span>
+            <span>Mer</span>
             <span></span>
-            <span>Fri</span>
+            <span>Ven</span>
             <span></span>
           </div>
           <div class="grid"></div>
         </div>
         <div class="legend">
-          <span class="legend-label">Less</span>
+          <span class="legend-label">Moins</span>
           <span class="day-cell dot-l0"></span>
           <span class="day-cell dot-l1"></span>
           <span class="day-cell dot-l2"></span>
           <span class="day-cell dot-l3"></span>
           <span class="day-cell dot-l4"></span>
-          <span class="legend-label">More</span>
+          <span class="legend-label">Plus</span>
         </div>
       </div>
     </article>

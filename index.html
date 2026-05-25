@@ -2,8 +2,29 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Habitracker</title>
+  <meta name="description" content="Track daily habits with a GitHub-style contribution graph." />
+  <meta name="theme-color" content="#0d1117" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Habitracker" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Habitracker" />
+  <meta property="og:description" content="Track daily habits with a GitHub-style contribution graph." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="icons/icon-512.png" />
+
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -106,5 +127,12 @@
   <div id="tooltip" class="tooltip hidden"></div>
 
   <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

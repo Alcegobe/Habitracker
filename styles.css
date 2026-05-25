@@ -57,6 +57,7 @@ body {
   background: var(--bg-canvas);
   border-bottom: 1px solid var(--border-default);
   padding: 16px 0;
+  padding-top: calc(16px + env(safe-area-inset-top));
 }
 
 .header-inner {
@@ -401,6 +402,7 @@ body {
 /* Footer */
 .app-footer {
   padding: 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   text-align: center;
   color: var(--fg-subtle);
   font-size: 12px;

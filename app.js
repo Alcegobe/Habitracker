@@ -183,7 +183,11 @@
     const d = new Date(date); d.setHours(0, 0, 0, 0); return d;
   }
   function startOfWeek(date) {
-    const d = startOfDay(date); d.setDate(d.getDate() - d.getDay()); return d;
+    // Week starts Monday (French/ISO convention)
+    const d = startOfDay(date);
+    const offset = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - offset);
+    return d;
   }
 
   // ===== Stats =====

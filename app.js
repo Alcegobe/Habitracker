@@ -82,13 +82,14 @@
   const importFile = $("importFile");
   const archivedList = $("archivedList");
 
-  // Note modal
+  // Note / Day editor modal
   const noteModal = $("noteModal");
   const noteForm = $("noteForm");
   const noteTitle = $("noteTitle");
   const noteInput = $("noteInput");
   const noteCancel = $("noteCancel");
   const noteDelete = $("noteDelete");
+  const stateButtons = noteForm.querySelectorAll(".state-btn");
 
   // Toast & confetti
   const toast = $("toast");
@@ -621,8 +622,9 @@
           const key = dateKey(cellDate);
           const done = doneSet.has(key);
           if (done) cell.style.background = colorBase;
+          if (habit.notes[key]) cell.classList.add("has-note");
           cell.dataset.date = key;
-          cell.addEventListener("click", () => toggleDay(habit.id, key));
+          cell.addEventListener("click", () => openNoteModal(habit.id, key));
           cell.addEventListener("mouseenter", (e) => showTooltip(e, key, done, habit));
           cell.addEventListener("mousemove", moveTooltip);
           cell.addEventListener("mouseleave", hideTooltip);
@@ -711,12 +713,14 @@
   function attachTapOrLongPress(el, onTap, onLongPress) {
     let timer = null;
     let isLongPress = false;
+    let cancelled = false;
     let startX = 0, startY = 0;
     const THRESHOLD_MS = 450;
-    const MOVE_TOLERANCE = 8;
+    const MOVE_TOLERANCE = 10;
 
     const start = (x, y) => {
       isLongPress = false;
+      cancelled = false;
       startX = x; startY = y;
       timer = setTimeout(() => {
         isLongPress = true;
@@ -725,12 +729,18 @@
       }, THRESHOLD_MS);
     };
     const move = (x, y) => {
+      if (cancelled) return;
       if (Math.abs(x - startX) > MOVE_TOLERANCE || Math.abs(y - startY) > MOVE_TOLERANCE) {
-        clearTimeout(timer);
-        timer = null;
+        cancelled = true;
+        if (timer) { clearTimeout(timer); timer = null; }
       }
     };
     const end = () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (!isLongPress && !cancelled) onTap();
+    };
+    const cancel = () => {
+      cancelled = true;
       if (timer) { clearTimeout(timer); timer = null; }
     };
 
@@ -742,15 +752,11 @@
       const t = e.touches[0];
       move(t.clientX, t.clientY);
     }, { passive: true });
-    el.addEventListener("touchend", () => {
-      end();
-      if (!isLongPress) onTap();
-    });
-    el.addEventListener("touchcancel", end);
+    el.addEventListener("touchend", end);
+    el.addEventListener("touchcancel", cancel);
 
-    // Mouse fallback (no long press via mouse — desktop uses regular click)
+    // Mouse: use a plain click for desktop. Touch devices already handled above.
     el.addEventListener("click", (e) => {
-      // touchend already fired onTap on mobile; avoid double
       if (e.detail === 0) return; // synthetic
       if (window.matchMedia("(hover: hover)").matches) onTap();
     });
@@ -942,20 +948,43 @@
   modalCancel.addEventListener("click", closeHabitModal);
   habitModal.addEventListener("click", (e) => { if (e.target === habitModal) closeHabitModal(); });
 
-  // ===== Note modal =====
+  // ===== Day editor modal (state toggle + note) =====
   function openNoteModal(habitId, key) {
     const habit = habits.find((h) => h.id === habitId);
     if (!habit) return;
-    noteState = { habitId, dateKey: key };
-    const d = parseKey(key);
-    noteTitle.textContent = d.toLocaleDateString(LOCALE, {
+    const date = parseKey(key);
+    const isFuture = date > new Date();
+    const done = habit.dates.includes(key);
+
+    noteState = { habitId, dateKey: key, done };
+    noteTitle.textContent = date.toLocaleDateString(LOCALE, {
       weekday: "long", day: "numeric", month: "long",
     });
     noteInput.value = habit.notes[key] || "";
     noteDelete.classList.toggle("hidden", !habit.notes[key]);
+
+    stateButtons.forEach((b) => {
+      b.disabled = isFuture;
+    });
+    updateStateButtons();
     showModal(noteModal);
-    setTimeout(() => noteInput.focus(), 50);
   }
+
+  function updateStateButtons() {
+    if (!noteState) return;
+    stateButtons.forEach((b) => {
+      b.classList.toggle("active", String(noteState.done) === b.dataset.state);
+    });
+  }
+
+  stateButtons.forEach((b) => {
+    b.addEventListener("click", () => {
+      if (!noteState) return;
+      noteState.done = b.dataset.state === "true";
+      updateStateButtons();
+      haptic();
+    });
+  });
 
   function closeNoteModal() { hideModal(noteModal); noteState = null; }
 
@@ -964,12 +993,37 @@
     if (!noteState) return;
     const habit = habits.find((h) => h.id === noteState.habitId);
     if (!habit) return;
+
+    const key = noteState.dateKey;
     const text = noteInput.value.trim();
-    if (text) habit.notes[noteState.dateKey] = text;
-    else delete habit.notes[noteState.dateKey];
+    const wasDone = habit.dates.includes(key);
+    const wantDone = noteState.done;
+    let newAchievements = [];
+
+    if (wantDone && !wasDone) {
+      habit.dates.push(key);
+      newAchievements = evaluateAchievements(habit);
+    } else if (!wantDone && wasDone) {
+      const idx = habit.dates.indexOf(key);
+      if (idx >= 0) habit.dates.splice(idx, 1);
+    }
+
+    if (text) habit.notes[key] = text;
+    else delete habit.notes[key];
+
     closeNoteModal();
     saveHabits();
     render();
+
+    if (newAchievements.length) {
+      fireConfetti();
+      flash(`${newAchievements[0].icon} ${newAchievements[0].title} débloqué !`);
+    } else if (wantDone && !wasDone) {
+      const tc = todayCount();
+      if (tc.done > 0 && tc.done === tc.total && key === todayKey()) {
+        fireConfetti();
+      }
+    }
   });
 
   noteCancel.addEventListener("click", closeNoteModal);
@@ -978,9 +1032,9 @@
     const habit = habits.find((h) => h.id === noteState.habitId);
     if (!habit) return;
     delete habit.notes[noteState.dateKey];
-    closeNoteModal();
     saveHabits();
-    render();
+    noteDelete.classList.add("hidden");
+    noteInput.value = "";
   });
   noteModal.addEventListener("click", (e) => { if (e.target === noteModal) closeNoteModal(); });
 

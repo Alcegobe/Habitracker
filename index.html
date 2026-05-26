@@ -165,6 +165,7 @@
           <span class="legend-label">Plus</span>
         </div>
       </div>
+      <p class="hint">Touche une case pour cocher ce jour ou ajouter une note.</p>
     </article>
   </template>
 
@@ -221,17 +222,24 @@
       <h3 id="noteTitle">Note</h3>
       <form id="noteForm">
         <div class="modal-field">
-          <label class="field-label" for="noteInput">Note du jour</label>
+          <span class="field-label">État</span>
+          <div class="state-toggle">
+            <button type="button" class="state-btn" data-state="false">Pas fait</button>
+            <button type="button" class="state-btn" data-state="true">✓ Fait</button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label class="field-label" for="noteInput">Note <span class="optional">(facultative)</span></label>
           <textarea
             id="noteInput"
             class="input textarea"
-            rows="4"
+            rows="3"
             maxlength="280"
             placeholder="Comment c'était ? Quelque chose à retenir ?"
           ></textarea>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-danger hidden" id="noteDelete">Effacer</button>
+          <button type="button" class="btn btn-danger hidden" id="noteDelete">Effacer note</button>
           <span class="spacer"></span>
           <button type="button" class="btn" id="noteCancel">Annuler</button>
           <button type="submit" class="btn btn-primary">Enregistrer</button>

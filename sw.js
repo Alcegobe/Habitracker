@@ -1,4 +1,4 @@
-const CACHE_VERSION = "habitracker-v4";
+const CACHE_VERSION = "habitracker-v5";
 const ASSETS = [
   "./",
   "./index.html",

@@ -303,8 +303,34 @@
   <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloading = false;
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        // Skip on first install — the page already runs the latest code,
+        // it just wasn't controlled by a worker yet.
+        if (!hadController) return;
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        navigator.serviceWorker.register("./sw.js").then((reg) => {
+          const checkForUpdate = () => reg.update().catch(() => {});
+          window.addEventListener("focus", checkForUpdate);
+          setInterval(checkForUpdate, 30 * 60 * 1000);
+
+          reg.addEventListener("updatefound", () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener("statechange", () => {
+              if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                nw.postMessage("SKIP_WAITING");
+              }
+            });
+          });
+        }).catch(() => {});
       });
     }
   </script>
